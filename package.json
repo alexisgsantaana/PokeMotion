@@ -1,0 +1,11 @@
+{
+  "name": "pokemotion",
+  "version": "1.0.0",
+  "description": "Pokemon motion battle simulator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alexis",
+  "license": "ISC"
+}

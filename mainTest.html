@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>ZIM - Code Creativity</title>
+
+    <!-- zimjs.com - JavaScript Canvas Framework -->
+    <script type=module>
+
+import zim from "https://zimjs.com/cdn/015/zim_game";
+
+const assets = ["inGame.ttf","Hollow.ttf","Solid.ttf","bulbasaur.png","charmander.png","squirtle.png","picker.png","pokeball.png", "battleBackground.png","battleTextBox.png"];
+
+const path = "assets/"
+
+// See Docs under Frame for FIT, FILL, FULL, and TAG
+new Frame(FIT, 1024, 768, darker, dark, ready, assets, path, new ProgressBar());
+function ready() {
+
+    // function showOpeningContainer() { 
+    //     const openingContainer = new Container(W, H).addTo(S).centerReg();
+
+    //     const label = new Label({
+    //         text: "PokeMotion",
+    //         size:120,
+    //         font:"Solid.ttf",
+    //         color:yellow
+    //     })
+    //         .addTo(openingContainer)
+    //         .center();
+
+    //     const label2 = new Label({
+    //         text: "PokeMotion",
+    //         size:120,
+    //         font:"Hollow.ttf",
+    //         color:blue.darken(.5),
+    //         outlineWidth:4
+    //     })
+    //         .addTo(openingContainer)
+    //         .center();
+                
+    //     openingContainer.animate({
+    //         props: { scale: 100 },
+    //         time: 9,
+    //         rewind: false,
+    //         call: () => openingContainer.animate({ alpha: 0 }, 1, null, () => {
+    //                 openingContainer.dispose();
+    //                 showInstructionalGuide()
+    //                 S.update();
+    //             })
+    //     });
+    // };
+    // showOpeningContainer();
+
+    // STYLE
+    //     // Instructional guide function
+    // function showInstructionalGuide() {
+    //     const instructionContainer = new Container(W, H).addTo(S).alp(0).animate({
+    //         props: { alpha: 1 },
+    //         time: 2,
+    //         rewind: false,
+    // });
+        STYLE = {
+                font:"InGame.ttf"
+            };
+    //     let instructions = new Label({
+    //         text:"Welcome to PokeMotion! Attack your opponent using motion-based moves by shaking your controller for different attack intensities. Take turns attacking until one Pokémon's HP reaches 0 to defeat your opponent and win the battle!",
+    //         labelWidth:750,
+    //         size: 30,
+    //         color: white,
+    //         splitWords:true
+    //     }).center().addTo(instructionContainer);
+        
+    //     instructionContainer.animate({
+    //         props: { alpha: 0 },
+    //         time: 3,
+    //         rewind: false,
+    //         wait: 10,
+    //         call: () => choosePokemonPlayer1(),
+    //     });
+    // }
+
+    let selectedPokemonPlayer1 = null;
+    let selectedPokemonPlayer2 = null;
+
+    function choosePokemonPlayer1() {
+        const choosePokemonContainer = new Container(W, H).addTo(S).alp(0).animate({
+            props: { alpha: 1 },
+            time: 2,
+            rewind: false,
+        });
+
+        let intructionTitle = new Label({
+            text: "Choose Your Pokemon",
+            size:30,
+            outlineWidth:3,
+            color:white
+        }).center().pos(0,70, CENTER, TOP).addTo(choosePokemonContainer);
+
+        let player1Title = new Label({
+            text: "Player 1",
+            size:30,
+            outlineWidth:3,
+            color:yellow
+        }).center().pos(0,100, CENTER, BOTTOM).addTo(choosePokemonContainer);
+
+        // Pokemon containers
+        const bulbasaur = new Container(280, 300).addTo(choosePokemonContainer).pos(-300, 0, CENTER, CENTER);
+        const bulbasaurPic = new Pic("bulbasaur.png").addTo(bulbasaur).centerReg().sca(0.3);
+        const bulbasaurName = new Label({
+            text: "Bulbasaur",
+            size: 20,
+            color: "white"
+        }).addTo(bulbasaur).centerReg().pos(0, 0, CENTER, BOTTOM);
+
+        const charmander = new Container(280, 300).addTo(choosePokemonContainer).pos(0, 0, CENTER, CENTER);
+        const charmanderPic = new Pic("charmander.png").addTo(charmander).centerReg().sca(0.3);
+        const charmanderName = new Label({
+            text: "Charmander",
+            size: 20,
+            color: "white"
+        }).addTo(charmander).centerReg().pos(0, 0, CENTER, BOTTOM);
+
+        const squirtle = new Container(280, 300).addTo(choosePokemonContainer).pos(300, 0, CENTER, CENTER);
+        const squirtlePic = new Pic("squirtle.png").addTo(squirtle).centerReg().sca(0.3);
+        const squirtleName = new Label({
+            text: "Squirtle",
+            size: 20,
+            color: "white"
+        }).addTo(squirtle).centerReg().pos(0, 0, CENTER, BOTTOM);
+
+        // Picker container
+        const pickerContainer = new Container(100, 100).addTo(choosePokemonContainer).centerReg().pos(50, 180, CENTER, TOP).setBounds();
+        const picker = new Pic("picker.png")
+            .addTo(pickerContainer)
+            .centerReg()
+            .sca(0.2)
+            .animate({
+                props: { y: 7 },
+                loop: true,
+                rewind: true,
+            });
+
+    // Function to check hitTest and change color
+    function checkHitTest() {
+        if (pickerContainer.hitTestBounds(bulbasaur)) {
+            selectedPokemonPlayer1 = "Bulbasaur";
+            bulbasaurName.color = "red";
+            charmanderName.color = squirtleName.color = "white";
+            zog("Hit detected with Bulbasaur container");
+        } else if (pickerContainer.hitTestBounds(charmander)) {
+            selectedPokemonPlayer1 = "Charmander";
+            charmanderName.color = "red";
+            bulbasaurName.color = squirtleName.color = "white";
+            zog("Hit detected with Charmander container");
+        } else if (pickerContainer.hitTestBounds(squirtle)) {
+            selectedPokemonPlayer1 = "Squirtle";
+            squirtleName.color = "red";
+            bulbasaurName.color = charmanderName.color = "white";
+            zog("Hit detected with Squirtle container");
+        } else {
+            selectedPokemonPlayer1 = null; // No Pokémon selected
+            bulbasaurName.color = charmanderName.color = squirtleName.color = "white";
+            zog("No hit detected");
+        }
+    }
+
+        let moveAmount = 280;
+        let newX = pickerContainer.x; // Initialize newX to the starting position of pickerContainer
+
+        F.on("keydown", e => {
+            if (e.key == "ArrowLeft") {
+                newX = Math.max(newX - moveAmount, 0 + 290);
+                pickerContainer.x = newX;
+                checkHitTest(); // Check hitTest after movement
+            } else if (e.key == "ArrowRight") {
+                newX = Math.min(newX + moveAmount + 10, S.width - 180);
+                pickerContainer.x = newX;
+                checkHitTest(); // Check hitTest after movement
+            }
+
+            let bounds = pickerContainer.getBounds();
+            zog("New bounds:", bounds);
+        });
+
+    // Event listener for enter key press
+    F.on("keydown", (e) => {
+        if (e.key === "Enter") {
+            // Check hitTest before accessing selectedPokemonPlayer1
+            checkHitTest();
+            zog("Selected Pokemon Player 1:"+ selectedPokemonPlayer1);
+            // Animate selected Pokemon
+                if (selectedPokemonPlayer1) {
+                    switch (selectedPokemonPlayer1) {
+                        case "Bulbasaur":
+                            bulbasaurPic.animate({
+                                props: [
+                                    { props: { y: bulbasaurPic.y - 10 }, time: .2},
+                                    { props: { y: bulbasaurPic.y + 10 }, time: .1, ease: "bounceOut" },
+                                    { props: { y: bulbasaurPic.y - 10 }, time: .2},
+                                    { props: { y: bulbasaurPic.y + 10 }, time: .1, ease: "bounceOut" },
+                                ],
+                                call: () => choosePokemonContainer.animate({
+                                    props: { alpha: 0 },
+                                    time: 1,
+                                    rewind: false,
+                                    call: () => {choosePokemonPlayer2()
+                                    choosePokemonContainer.removeFrom(S)}
+                                })
+                            });
+                            break;
+                        case "Charmander":
+                            charmanderPic.animate({
+                                props: [
+                                    { props: { y: charmanderPic.y - 10 }, time: .2},
+                                    { props: { y: charmanderPic.y + 10 }, time: .1, ease: "bounceOut" },
+                                    { props: { y: charmanderPic.y - 10 }, time: .2},
+                                    { props: { y: charmanderPic.y + 10 }, time: .1, ease: "bounceOut" },
+                                ],
+                                call: () => choosePokemonContainer.animate({
+                                    props: { alpha: 0 },
+                                    time: 1,
+                                    rewind: false,
+                                    call: () => {choosePokemonPlayer2()
+                                    choosePokemonContainer.removeFrom(S)}
+                                })
+                            });
+                            break;
+                        case "Squirtle":
+                            squirtlePic.animate({
+                                props: [
+                                    { props: { y: squirtlePic.y - 10 }, time: .2},
+                                    { props: { y: squirtlePic.y + 10 }, time: .1, ease: "bounceOut" },
+                                    { props: { y: squirtlePic.y - 10 }, time: .2},
+                                    { props: { y: squirtlePic.y + 10 }, time: .1, ease: "bounceOut" },
+                                ],
+                                call: () => choosePokemonContainer.animate({
+                                    props: { alpha: 0 },
+                                    time: 1,
+                                    rewind: false,
+                                    call: () => {choosePokemonPlayer2()
+                                    choosePokemonContainer.removeFrom(S)}
+                                })
+                            });
+                            break;
+                        default:
+                            break;
+                            S.update()
+                    }
+                }
+            }
+        })
+    };
+
+    function choosePokemonPlayer2() {
+        const choosePokemonContainer = new Container(W, H).addTo(S).alp(0).animate({
+            props: { alpha: 1 },
+            time: 2,
+            rewind: false,
+        });
+
+        let intructionTitle = new Label({
+            text: "Choose Your Pokemon",
+            size:30,
+            outlineWidth:3,
+            color:white
+        }).center().pos(0,70, CENTER, TOP).addTo(choosePokemonContainer);
+
+        let player2Title = new Label({
+            text: "Player 2",
+            size:30,
+            outlineWidth:3,
+            color:yellow
+        }).center().pos(0,100, CENTER, BOTTOM).addTo(choosePokemonContainer);
+
+        // Pokemon containers
+        const bulbasaur = new Container(280, 300).addTo(choosePokemonContainer).pos(-300, 0, CENTER, CENTER);
+        const bulbasaurPic = new Pic("bulbasaur.png").addTo(bulbasaur).centerReg().sca(0.3);
+        const bulbasaurName = new Label({
+            text: "Bulbasaur",
+            size: 20,
+            color: "white"
+        }).addTo(bulbasaur).centerReg().pos(0, 0, CENTER, BOTTOM);
+
+        const charmander = new Container(280, 300).addTo(choosePokemonContainer).pos(0, 0, CENTER, CENTER);
+        const charmanderPic = new Pic("charmander.png").addTo(charmander).centerReg().sca(0.3);
+        const charmanderName = new Label({
+            text: "Charmander",
+            size: 20,
+            color: "white"
+        }).addTo(charmander).centerReg().pos(0, 0, CENTER, BOTTOM);
+
+        const squirtle = new Container(280, 300).addTo(choosePokemonContainer).pos(300, 0, CENTER, CENTER);
+        const squirtlePic = new Pic("squirtle.png").addTo(squirtle).centerReg().sca(0.3);
+        const squirtleName = new Label({
+            text: "Squirtle",
+            size: 20,
+            color: "white"
+        }).addTo(squirtle).centerReg().pos(0, 0, CENTER, BOTTOM);
+
+        // Picker container
+        const pickerContainer = new Container(100, 100).addTo(choosePokemonContainer).centerReg().pos(50, 180, CENTER, TOP).setBounds();
+        const picker = new Pic("picker.png")
+            .addTo(pickerContainer)
+            .centerReg()
+            .sca(0.2)
+            .animate({
+                props: { y: 7 },
+                loop: true,
+                rewind: true,
+            });
+
+    // Function to check hitTest and change color
+    function checkHitTest() {
+        if (pickerContainer.hitTestBounds(bulbasaur)) {
+            selectedPokemonPlayer2 = "Bulbasaur";
+            bulbasaurName.color = "red";
+            charmanderName.color = squirtleName.color = "white";
+            zog("Hit detected with Bulbasaur container");
+        } else if (pickerContainer.hitTestBounds(charmander)) {
+            selectedPokemonPlayer2 = "Charmander";
+            charmanderName.color = "red";
+            bulbasaurName.color = squirtleName.color = "white";
+            zog("Hit detected with Charmander container");
+        } else if (pickerContainer.hitTestBounds(squirtle)) {
+            selectedPokemonPlayer2 = "Squirtle";
+            squirtleName.color = "red";
+            bulbasaurName.color = charmanderName.color = "white";
+            zog("Hit detected with Squirtle container");
+        } else {
+            selectedPokemonPlayer2 = null; // No Pokémon selected
+            bulbasaurName.color = charmanderName.color = squirtleName.color = "white";
+            zog("No hit detected");
+        }
+    }
+
+        let moveAmount = 280;
+        let newX = pickerContainer.x; // Initialize newX to the starting position of pickerContainer
+
+        F.on("keydown", e => {
+            if (e.key == "ArrowLeft") {
+                newX = Math.max(newX - moveAmount, 0 + 290);
+                pickerContainer.x = newX;
+                checkHitTest(); // Check hitTest after movement
+            } else if (e.key == "ArrowRight") {
+                newX = Math.min(newX + moveAmount + 10, S.width - 180);
+                pickerContainer.x = newX;
+                checkHitTest(); // Check hitTest after movement
+            }
+
+            let bounds = pickerContainer.getBounds();
+            zog("New bounds:", bounds);
+        });
+
+    // Event listener for enter key press
+    F.on("keydown", (e) => {
+        if (e.key === "Enter") {
+            // Check hitTest before accessing selectedPokemonPlayer1
+            checkHitTest();
+            zog("Selected Pokemon Player 2:"+ selectedPokemonPlayer2);
+            // Animate selected Pokemon
+                if (selectedPokemonPlayer2) {
+                    switch (selectedPokemonPlayer2) {
+                        case "Bulbasaur":
+                            bulbasaurPic.animate({
+                                props: [
+                                    { props: { y: bulbasaurPic.y - 10 }, time: .2},
+                                    { props: { y: bulbasaurPic.y + 10 }, time: .1, ease: "bounceOut" },
+                                    { props: { y: bulbasaurPic.y - 10 }, time: .2},
+                                    { props: { y: bulbasaurPic.y + 10 }, time: .1, ease: "bounceOut" },
+                                ],
+                                call: () => choosePokemonContainer.animate({
+                                    props: { alpha: 0 },
+                                    time: .8,
+                                    rewind: false,
+                                    call: () => {transitionSequence()
+                                    choosePokemonContainer.removeFrom(S)}
+                                })
+                            });
+                            break;
+                        case "Charmander":
+                            charmanderPic.animate({
+                                props: [
+                                    { props: { y: charmanderPic.y - 10 }, time: .2},
+                                    { props: { y: charmanderPic.y + 10 }, time: .1, ease: "bounceOut" },
+                                    { props: { y: charmanderPic.y - 10 }, time: .2},
+                                    { props: { y: charmanderPic.y + 10 }, time: .1, ease: "bounceOut" },
+                                ],
+                                call: () => choosePokemonContainer.animate({
+                                    props: { alpha: 0 },
+                                    time: .8,
+                                    rewind: false,
+                                    call: () => {transitionSequence()
+                                    choosePokemonContainer.removeFrom(S)}
+                                })
+                            });
+                            break;
+                        case "Squirtle":
+                            squirtlePic.animate({
+                                props: [
+                                    { props: { y: squirtlePic.y - 10 }, time: .2},
+                                    { props: { y: squirtlePic.y + 10 }, time: .1, ease: "bounceOut" },
+                                    { props: { y: squirtlePic.y - 10 }, time: .2},
+                                    { props: { y: squirtlePic.y + 10 }, time: .1, ease: "bounceOut" },
+                                ],
+                                call: () => choosePokemonContainer.animate({
+                                    props: { alpha: 0 },
+                                    time: .8,
+                                    rewind: false,
+                                    call: () => {transitionSequence()
+                                    choosePokemonContainer.removeFrom(S)}
+                                })
+                            });
+                            break;
+                        default:
+                            break;
+                            S.update()
+                    }
+                }
+            }
+        })
+    };
+
+    function transitionSequence() {
+        const transitionScene = new Container(W,H).center().addTo(S);
+        // const background = new Rectangle({
+        //     width:W*3,
+        //     height:H,
+        //     color: "#E0E1DB" 
+        // })
+        // .centerReg()
+        // .pos(S.width * 3, 0, CENTER, CENTER)
+        // .addTo(transitionScene);
+
+        const pokeball = new Pic("pokeball.png").centerReg().pos(S.width*2,0,CENTER,CENTER).addTo(transitionScene);
+
+        // background.animate({
+        //     props: [
+        //         {props:{ x: -S.width/2,time:10}},
+        //         {props:{alpha:0,time:0.5}}
+        //         ],
+        //     call: () => {
+        //         background.removeFrom()
+        //     }
+        // });
+        pokeball.animate({
+            props: { x: -S.width,rotation: -360 },
+            time: 2,
+            call: () => {
+                pokeball.removeFrom()
+                battleScene()
+            }
+        });
+    }
+
+    S.update()
+
+
+    //FIX TRANSITION LATER RAHHHHHHHHH---------------------------
+
+    function battleScene(selectedPokemonPlayer1,selectedPokemonPlayer2) {
+        const battleSceneContainer = new Container(W, H).addTo(S).center()
+        // .alp(0).animate({
+        //     props: { alpha: 1 },
+        //     time: 2,
+        //     rewind: false,
+        // });
+        const battleBackground = new Pic("battleBackground.png").center().addTo(battleSceneContainer);
+
+        const battleTextBoxContainer = new Container(W-50,H/3.5).addTo().center().pos(0,15,CENTER,BOTTOM).outline();
+        const battleTextBox = new Pic("battleBackground.png").center().addTo(battleTextBoxContainer);
+
+        const player1Container = new Container(300,300).addTo().pos(-270,100,CENTER,CENTER).outline();
+    
+
+
+
+        const player2Container = new Container(300,300).addTo().pos(270,-170,CENTER,CENTER).outline();
+        
+
+        
+        const player1Name = new Label({
+            text:"PLAYER 1",
+            size: 26,
+            color: black,
+        }).center().addTo(battleSceneContainer).addTo().pos(335,10,CENTER,CENTER);
+
+        const player2Name = new Label({
+            text:"PLAYER 2",
+            size: 26,
+            color: black,
+        }).center().addTo(battleSceneContainer).addTo().pos(-200,-235,CENTER,CENTER);
+    }
+    // choosePokemonPlayer1()
+    battleScene()
+} // end ready
+
+</script>
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+</head>
+
+<body></body>
+
+</html>

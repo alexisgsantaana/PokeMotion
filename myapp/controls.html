@@ -1,0 +1,85 @@
+!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title></title>
+
+<script src="https://zimjs.org/cdn/CreateJS_min.js"></script>
+<script src="https://zimjs.org/cdn/2.3.0/socket.io.js"></script>
+<script src="https://zimjs.org/cdn/zimserver_urls.js"></script>
+<script src="https://zimjs.org/cdn/zimsocket_1.1.js"></script>
+
+<script type=module>
+import zim from "https://zimjs.org/cdn/016/zim_socket";
+        
+new Frame(FIT, 1024, 768, light, dark, ready);
+function ready() {
+        // Event listener for directional pad and button press on mobile controller for Player A
+        controllerA.addEventListener('input', () => {
+            const direction = controllerA.getDirection(); // Get direction from directional pad
+            const buttonPressed = controllerA.getButtonState(); // Check if button A is pressed
+            // Send data to main screen indicating directional pad movement and button press from Player A
+            socket.setProperties({ player: 'A', direction: direction, buttonPressed: buttonPressed });
+        });
+        
+        // Event listener for directional pad and button press on mobile controller for Player B
+        controllerB.addEventListener('input', () => {
+            const direction = controllerB.getDirection(); // Get direction from directional pad
+            const buttonPressed = controllerB.getButtonState(); // Check if button A is pressed
+            // Send data to main screen indicating directional pad movement and button press from Player B
+            socket.setProperties({ player: 'B', direction: direction, buttonPressed: buttonPressed });
+        });
+        
+        // When the socket is ready we get this event
+        socket.on("ready", () => {
+            // Listen for incoming data from mobile controllers
+            socket.on("data", data => {
+                // Check the player and action from the data received
+                const player = data.player;
+                const direction = data.direction;
+                const buttonPressed = data.buttonPressed;
+        
+                // Display content on the main screen based on player actions
+                if (player === 'A') {
+                    if (direction === 'up') {
+                        // Handle up direction for Player A
+                    } else if (direction === 'down') {
+                        // Handle down direction for Player A
+                    } else if (direction === 'left') {
+                        // Handle left direction for Player A
+                    } else if (direction === 'right') {
+                        // Handle right direction for Player A
+                    }
+                    if (buttonPressed) {
+                        // Handle button press for Player A
+                    }
+                } else if (player === 'B') {
+                    if (direction === 'up') {
+                        // Handle up direction for Player B
+                    } else if (direction === 'down') {
+                        // Handle down direction for Player B
+                    } else if (direction === 'left') {
+                        // Handle left direction for Player B
+                    } else if (direction === 'right') {
+                        // Handle right direction for Player B
+                    }
+                    if (buttonPressed) {
+                        // Handle button press for Player B
+                    }
+                }
+            });
+        });
+        
+        // Error handling
+        socket.on("error", () => {
+            new zim.Pane("SORRY, COULD NOT CONNECT").show();
+        });
+    }//end ready
+
+</script>
+
+</head>
+<body>
+    
+</body>
+</html>
