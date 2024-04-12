@@ -15,7 +15,7 @@ const assets = ["inGame.ttf","Hollow.ttf","Solid.ttf","bulbasaur.png","charmande
 const path = "assets/"
 
 // See Docs under Frame for FIT, FILL, FULL, and TAG
-new Frame(FIT, 1024, 768, darker, dark, ready, assets, path, new ProgressBar());
+new Frame(FIT, 1024, 768, darker, dark, ready, assets, path);
 function ready() {
 
     // function showOpeningContainer() { 
@@ -459,6 +459,19 @@ function ready() {
 
     //FIX TRANSITION LATER RAHHHHHHHHH---------------------------
 
+    const scorerP1 = new Scorer({
+        score:100,
+        size:25,
+        backgroundColor:clear, 
+        color:black
+    });
+    const scorerP2 = new Scorer({
+        score:100,
+        size:25,
+        backgroundColor:clear, 
+        color:black
+    });
+
     function battleScene(selectedPokemonPlayer1,selectedPokemonPlayer2) {
         const battleSceneContainer = new Container(W, H).addTo(S).center()
         // .alp(0).animate({
@@ -484,13 +497,17 @@ function ready() {
             text:"PLAYER 1",
             size: 26,
             color: black,
-        }).center().addTo(battleSceneContainer).addTo().pos(335,10,CENTER,CENTER);
+        }).center().addTo().pos(335,10,CENTER,CENTER);
 
         const player2Name = new Label({
             text:"PLAYER 2",
             size: 26,
             color: black,
-        }).center().addTo(battleSceneContainer).addTo().pos(-200,-235,CENTER,CENTER);
+        }).center().addTo().pos(-200,-235,CENTER,CENTER);
+
+        scorerP1.addTo().pos(280,48,CENTER,CENTER);
+        scorerP2.addTo().pos(-238,-197,CENTER,CENTER)
+
     }
     // choosePokemonPlayer1()
     battleScene()
