@@ -15,6 +15,10 @@
         new Frame(FIT, 1024, 768, light, dark, ready);
 
         function ready() {
+            STYLE = {
+                font:"InGame.ttf"
+            };
+
             setupMainScreen();
             handleDeviceCommunications();
         }
@@ -33,24 +37,20 @@
             // Listen for socket events
             socket.on("ready", function() {
                 zog("Connected to socket");
-                // Display the initial number of users
                 numUsersLabel.text = "Users: " + (socket.size + 1);
                 S.update();
             });
 
             socket.on("otherjoin", function () {
-                // Update the number of users when someone else joins
                 numUsersLabel.text = "Users: " + (socket.size + 1);
                 S.update();
                 
-                // Check if the total number of users is 3 to transition to the main screen
                 if (socket.size + 1 === 3) {
                     transitionToMainScreen();
                 }
             });
 
             socket.on("otherleave", function () {
-                // Update the number of users when someone leaves
                 numUsersLabel.text = "Users: " + (socket.size + 1);
                 S.update();
             });
