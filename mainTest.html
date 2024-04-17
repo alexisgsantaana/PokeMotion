@@ -13,7 +13,7 @@ import zim2 from "https://zimjs.org/cdn/016/zim_game";
 
 const assets = ["inGame.ttf","Hollow.ttf","Solid.ttf","bulbasaur.png","charmander.png","squirtle.png",
 "picker.png","pokeball.png", "battleBackground.png","battleTextBox.png","bulbasaur-mirrored.png","charmander-mirrored.png","squirtle-mirrored.png",
-"vineWhip.png","leaf.png","ember.png","flame.png","bubbles.png"];
+"vineWhip.png","leaf.png","ember.png","flame.png","bubbles.png","attack.mp3","select.mp3","pickachu.mp3","battle.mp3"];
 
 const path = "assets/"
 
@@ -21,8 +21,32 @@ const path = "assets/"
 new Frame(FIT, 1024, 768, darker, dark, ready, assets, path);
 function ready() {
 
+    const battle = new Aud({
+        file:"battle.mp3",
+        interrupt:"none",
+        maxNum:1
+    }); 
+
+    const select= new Aud({
+            file:"select.mp3",
+            interrupt:"none",
+            maxNum:1
+    });
+    const pickachu = new Aud({
+        file:"pickachu.mp3",
+        interrupt:"none",
+        maxNum:1
+    });
+
+    const attack = new Aud({
+            file:"attack.mp3",
+            interrupt:"none",
+            maxNum:1
+    });
+
     function showOpeningContainer() { 
         const openingContainer = new Container(W, H).addTo(S).center();
+        pickachu.play();
 
         const label = new Label({
             text: "PokeMotion",
@@ -92,6 +116,9 @@ function ready() {
 // Define selectedPokemonPlayer1 variable outside the function
     let selectedPokemonPlayer1
     let selectedPokemonPlayer2
+
+    ////AUDIO-------------------------
+    
 
     const pokemonData = [
         { name: "Bulbasaur", image: "bulbasaur.png", position: { x: -300, y: 0 } },
@@ -164,10 +191,12 @@ function ready() {
             if (e.key == "ArrowLeft") {
                 newX = Math.max(newX - moveAmount, 0 + 290);
                 pickerContainer.x = newX;
+                select.play();
                 checkHitTest(); 
             } else if (e.key == "ArrowRight") {
                 newX = Math.min(newX + moveAmount + 10, S.width - 180);
                 pickerContainer.x = newX;
+                select.play();
                 checkHitTest(); 
             }
 
@@ -180,6 +209,7 @@ function ready() {
             choosePokemonPlayer2();
             choosePokemonContainer.removeFrom();
             zog("Selected Pokemon Player 1: " + selectedPokemonPlayer1);
+            select.play();
 
             // Remove the tap event listener for player 1 selection
             aButton.off("click");
@@ -257,9 +287,11 @@ function ready() {
                 newX = Math.max(newX - moveAmount, 0 + 290);
                 pickerContainer.x = newX;
                 checkHitTest(); // Check hitTest after movement
+                select.play();
             } else if (e.key == "ArrowRight") {
                 newX = Math.min(newX + moveAmount + 10, S.width - 180);
                 pickerContainer.x = newX;
+                select.play();
                 checkHitTest(); // Check hitTest after movement
             }
 
@@ -281,13 +313,14 @@ function ready() {
         bButton.on("click", ()=> {
             checkHitTest();
             transitionSequence();
+            select.play();
             choosePokemonContainer.removeFrom();
             const transition = new Rectangle(W, H, black).center().addTo().alp(0).animate({
                 props: { alpha: 1 },
                 time: 3,
                 rewind: false
             });
-
+            
             zog("Selected Pokemon Player 2: " + selectedPokemonPlayer2);
 
             bButton.off("click");
@@ -373,6 +406,7 @@ function ready() {
 //BATTLE START------------------------------------------------------------------------
 
     function battleScene(selectedPokemonPlayer1, selectedPokemonPlayer2) {
+        battle.play();
         STYLE = {
                 font:"InGame.ttf"
             };
@@ -495,7 +529,7 @@ function ready() {
             const winnerLabel = new Label({
                 text: winner + " wins!",
                 size: 40,
-                color: "white"
+                color: black
             }).center().addTo(endGameContainer);
 
             const restartButton = new Button({
@@ -508,25 +542,23 @@ function ready() {
             }).addTo(endGameContainer).pos(0, 100, CENTER, TOP);
 
             restartButton.on("click", () => {
-                endGameContainer.removeFrom();
-                attackContainer.removeFrom();
-                player1Container.removeFrom();
-                player2Container.removeFrom();
-                battleSceneContainer.removeFrom();
-                battleGageContainer.removeFrom();
-                showInstructionalGuide();
+                window.location.reload();
+                select.play();
+                S.removeAllChildren();
+                S.update();
             });
         }
 
         function checkWinCondition() {
             let winner = "";
             if (scorerP1 <= 0) {
-                winner = "Player 2";
+                winner = "PLAYER 2";
             } else if (scorerP2 <= 0) {
-                winner = "Player 1";
+                winner = "PLAYER 1";
             }
             if (winner) {
                 endGame(winner);
+                S.update();
             }
         }
 
@@ -615,6 +647,7 @@ function ready() {
             
             function stopP1Bar(p1bar) {
                 p1bar.pauseAnimate(paused,"p1")
+                attack.play();
                 paused = true; 
                 isAnimating = false;
                 zog("p1bar"+ isAnimating);
@@ -763,6 +796,7 @@ function ready() {
 
             function stopP2Bar(p2bar) {
                 p2bar.pauseAnimate(paused,"p2"); 
+                attack.play();
                 isAnimating = false;
                 zog("p2bar"+ isAnimating);
 
@@ -925,9 +959,9 @@ function ready() {
     }//END OF BATTLE SCENE
 
 
-    choosePokemonPlayer1()
+    // choosePokemonPlayer1()
     // showInstructionalGuide()
-    // showOpeningContainer()
+    showOpeningContainer()
     // battleScene(selectedPokemonPlayer1, selectedPokemonPlayer2)
 } // end ready
 
