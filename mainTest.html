@@ -325,6 +325,7 @@ function ready() {
             }
         });
     }
+    
 
     S.update();
 
@@ -487,6 +488,48 @@ function ready() {
             color:black
         }).addTo().pos(-200,-197,CENTER,CENTER);
 
+        // End game functionality---------------------------------------
+        function endGame(winner) {
+            const endGameContainer = new Container(W, H).addTo(S).center();
+
+            const winnerLabel = new Label({
+                text: winner + " wins!",
+                size: 40,
+                color: "white"
+            }).center().addTo(endGameContainer);
+
+            const restartButton = new Button({
+                label: "Restart",
+                width: 250,
+                height: 50,
+                backgroundColor: red,
+                color: "black",
+                corner: 3
+            }).addTo(endGameContainer).pos(0, 100, CENTER, TOP);
+
+            restartButton.on("click", () => {
+                endGameContainer.removeFrom();
+                attackContainer.removeFrom();
+                player1Container.removeFrom();
+                player2Container.removeFrom();
+                battleSceneContainer.removeFrom();
+                battleGageContainer.removeFrom();
+                showInstructionalGuide();
+            });
+        }
+
+        function checkWinCondition() {
+            let winner = "";
+            if (scorerP1 <= 0) {
+                winner = "Player 2";
+            } else if (scorerP2 <= 0) {
+                winner = "Player 1";
+            }
+            if (winner) {
+                endGame(winner);
+            }
+        }
+
         S.update();
 
         function initiateBattleSequence() {
@@ -494,7 +537,7 @@ function ready() {
             const battleGageContainer = new Container(W-60, H / 3-80).addTo().center().pos(0, 30, CENTER, BOTTOM);
             
             new Label({
-                text: "Shake to stop your bar!",
+                text: "Shake to attack! Hit the center to cause more damage!",
                 size: 22,
                 color: black,
             }).center().addTo(battleGageContainer).pos(0,120,CENTER,BOTTOM)
@@ -534,21 +577,25 @@ function ready() {
             }).addTo(playerBars).pos(0,0,RIGHT,CENTER);
 
             let isAnimating;
+            let paused = false;
 
             function animateBars() {
                p1bar.animate({
                    props: { x: playerBars.width },
                    time: 3,
                    rewind: true,
-                   loop: true
+                   loop: true,
+                   id:"p1"
                })
                p2bar.animate({
                    props: { x: 0 },
                    time: 3,
                    rewind: true,
-                   loop: true
+                   loop: true,
+                   id:"p2"
                });
                isAnimating = true;
+               paused = false;
             }
 
             animateBars();
@@ -558,15 +605,17 @@ function ready() {
                     setTimeout(() => {
                         animateBars(); 
                         isAnimating = true; 
+                        paused = false;
+                        S.update();
                     }, 3000); 
                 }
             });
-            S.update();
 
 //PLAYER 1 BAR STOP ---------------------------------------------------------------------
             
             function stopP1Bar(p1bar) {
-                p1bar.stopAnimate(); 
+                p1bar.pauseAnimate(paused,"p1")
+                paused = true; 
                 isAnimating = false;
                 zog("p1bar"+ isAnimating);
 
@@ -713,7 +762,7 @@ function ready() {
 //PLAYER 2 BAR STOP-----------------------------------------------------------------------------------------
 
             function stopP2Bar(p2bar) {
-                p2bar.stopAnimate(); 
+                p2bar.pauseAnimate(paused,"p2"); 
                 isAnimating = false;
                 zog("p2bar"+ isAnimating);
 
@@ -857,22 +906,24 @@ function ready() {
             }
 
 
-            F.on("keydown", (e) => {
-                if (e.key === "Enter" && isAnimating) {
-                    stopP1Bar(p1bar);
-                }
-            });
+                F.on("keydown", (e) => {
+                    if (e.key === "Enter" && isAnimating) {
+                        stopP1Bar(p1bar);
+                    }
+                });
 
-            F.on("keydown", (e) => {
-                if ((e.key === "a" || e.key === "A") && isAnimating) {
-                    stopP2Bar(p2bar);
-                }
-            });
+                F.on("keydown", (e) => {
+                    if ((e.key === "a" || e.key === "A") && isAnimating) {
+                        stopP2Bar(p2bar);
+                    }
+                });
 
+                Ticker.add(() => {
+                checkWinCondition(); // Check win condition continuously
+            });
         }
-
-
     }//END OF BATTLE SCENE
+
 
     choosePokemonPlayer1()
     // showInstructionalGuide()
