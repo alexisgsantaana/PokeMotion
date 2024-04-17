@@ -310,6 +310,8 @@ function ready() {
             corner: 25
         }).addTo(choosePokemonContainer).pos(10, 10, RIGHT, BOTTOM);
 
+        
+        
         bButton.on("click", ()=> {
             checkHitTest();
             transitionSequence();
@@ -527,9 +529,12 @@ function ready() {
             const endGameContainer = new Container(W, H).addTo(S).center();
 
             const winnerLabel = new Label({
-                text: winner + " wins!",
+                text: winner + " WINS!",
                 size: 40,
-                color: black
+                color: black,
+                backgroundColor:yellow,
+                backgroundBorderColor: black,
+                corner:3
             }).center().addTo(endGameContainer);
 
             const restartButton = new Button({
@@ -631,17 +636,6 @@ function ready() {
             }
 
             animateBars();
-
-            Ticker.add(() => {
-                if (!isAnimating) { 
-                    setTimeout(() => {
-                        animateBars(); 
-                        isAnimating = true; 
-                        paused = false;
-                        S.update();
-                    }, 3000); 
-                }
-            });
 
 //PLAYER 1 BAR STOP ---------------------------------------------------------------------
             
@@ -942,19 +936,33 @@ function ready() {
 
                 F.on("keydown", (e) => {
                     if (e.key === "Enter" && isAnimating) {
-                        stopP1Bar(p1bar);
+                        stopP2Bar(p2bar);
+                        S.update();
                     }
                 });
 
                 F.on("keydown", (e) => {
                     if ((e.key === "a" || e.key === "A") && isAnimating) {
-                        stopP2Bar(p2bar);
+                        stopP1Bar(p1bar);
+                        S.update();
                     }
                 });
 
                 Ticker.add(() => {
+                if (!isAnimating) { 
+                    setTimeout(() => {
+                        animateBars(); 
+                        isAnimating = true; 
+                        paused = false;
+                        S.update();
+                    }, 3000); 
+                }
+            });
+
+                Ticker.add(() => {
                 checkWinCondition(); // Check win condition continuously
             });
+            S.update();
         }
     }//END OF BATTLE SCENE
 
