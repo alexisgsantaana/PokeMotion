@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Controller - P1</title>
+
+  <!-- zimjs.com - JavaScript Canvas Framework -->
+  <script type="module">
+    import zim from "https://zimjs.org/cdn/016/zim_socket2";
+    import zim2 from "https://zimjs.org/cdn/016/zim";
+
+    const assets = ["InGame.ttf"]
+    const path = "assets/"
+
+    // See Docs under Frame for FIT, FILL, FULL, and TAG
+    new Frame({
+      scaling: FIT,
+      width: 2896,
+      height: 1290,
+      color: grey,
+      outerColor: dark,
+      ready: ready,
+      assets: assets,
+      path: path,
+      sensors: true,
+    });
+
+    function ready() {
+      const permissionType1 = "deviceorientation";
+      const permissionType2 = "devicemotion";
+      const ask = new PermissionAsk(init, permissionType1, permissionType2);
+
+      function init(yes) {
+        if (yes) {
+          F.on("deviceorientation", (e) => {
+            const tiltData = {
+              rotationY: e.rotation.y,
+            };
+            socket.emit("tiltData", tiltData);
+          });
+
+          F.on("devicemotion", (e) => {
+            const motionData = {
+              accelerationX: e.acceleration.x,
+              accelerationY: e.acceleration.y,
+            };
+            socket.emit("motionData", motionData);
+          });
+        } else {
+          const errorPane = new Pane("SENSOR not available", yellow);
+          errorPane.show();
+        }
+      }
+
+      ask.request();
+      
+
+      function setupMainScreen() {
+        const mainScreenContainer = new Container(W, H).center();
+
+        const numUsersLabel = new Label("Users: 1")
+          .center()
+          .addTo(mainScreenContainer);
+
+        const appName = "pokemotion";
+        socket = new Socket(zimSocketURL, appName);
+
+        socket.on("ready", function () {
+          zog("Connected to socket");
+          numUsersLabel.text = "Users: " + (socket.size + 1);
+          S.update();
+        });
+
+        socket.on("otherjoin", function () {
+          numUsersLabel.text = "Users: " + (socket.size + 1);
+          S.update();
+
+          if (socket.size + 1 === 2) {
+            setupControllerScreen();
+          }
+        });
+
+        socket.on("otherleave", function () {
+          numUsersLabel.text = "Users: " + (socket.size + 1);
+          S.update();
+        });
+
+        socket.on("error", function () {
+          numUsersLabel.text = "Error occurred";
+          S.update();
+        });
+      }
+      STYLE = {
+        font: "InGame.ttf",
+        size: 150
+      }
+      function setupControllerScreen() {
+        const controllerContainer = new Container(W, H).center();
+
+        const player2Name = new Label({
+            text:"PLAYER 2",
+            size:80,
+            color: black,
+        }).center().addTo().pos(200,100,RIGHT,TOP);
+
+        new Circle(500,grey.darken(.3)).pos(200,0,LEFT,CENTER)
+        new Rectangle(1130, 300, "lightgrey", null, null, 30).pos(150, 0, LEFT, CENTER);
+        new Rectangle(300, 1130, "lightgrey", null, null, 30).pos(550, 0, LEFT, CENTER)
+
+        const leftArrow = new Arrow({
+          type: "triangle", 
+          backgroundColor: white,
+          rollBackgroundColor: red,
+          direction: LEFT
+        }).pos(400, 100, LEFT, CENTER).rot(180).sca(3.5);
+
+        const rightArrow = new Arrow({
+          type: "triangle", 
+          backgroundColor: white,
+          rollBackgroundColor: red,
+          direction: RIGHT
+        }).pos(-400, -70, CENTER, CENTER).sca(3.5);
+
+        leftArrow.on("click", () => {
+          zog(`Key pressed: ${key}`);
+          socket.emit("buttonPress", key);
+        });
+
+        rightArrow.on("click", () => {
+          zog(`Key pressed: ${key}`);
+          socket.emit("buttonPress", key);
+        });
+
+        const BButton = new Button({
+          label: "B",
+          size: 50,
+          width: 300,
+          height: 300,
+          backgroundColor: red,
+          color: red.darken(0.6),
+          corner: 150
+        }).pos(400, 0, RIGHT, CENTER)
+          .addTo(controllerContainer)
+          .on("click", () => {
+            const key = "A";
+            console.log(`Key pressed: ${key}`);
+            socket.emit("buttonPress", key);
+          });
+
+        S.update();
+      }
+
+      // setupControllerScreen() if sensor and socket not working
+     
+    } // end ready
+  </script>
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+</head>
+
+<body></body>
+
+</html>

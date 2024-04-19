@@ -20,29 +20,68 @@ const path = "assets/"
 // See Docs under Frame for FIT, FILL, FULL, and TAG
 new Frame(FIT, 1024, 768, darker, dark, ready, assets, path);
 function ready() {
-    const battle = new Aud({
+
+    let socket;
+
+    function setupMainScreen() {
+        const mainScreenContainer = new Container(W,H).center();
+
+        const numUsersLabel = new Label("Users: 1")
+                .center()
+                .addTo(mainScreenContainer);
+
+        // socket connection
+        const appName = "pokemotion";
+        socket = new Socket(zimSocketURL, appName); 
+
+        socket.on("ready", function() {
+            zog("Connected to socket");
+            numUsersLabel.text = "Users: " + (socket.size + 1);
+            S.update();
+        });
+
+        socket.on("otherjoin", function () {
+            numUsersLabel.text = "Users: " + (socket.size + 1);
+            S.update();
+            
+            if (socket.size + 1 === 3) {
+                showOpeningContainer();
+            }
+        });
+
+        socket.on("otherleave", function () {
+            numUsersLabel.text = "Users: " + (socket.size + 1);
+            S.update();
+        });
+
+        socket.on("error", function () {
+            numUsersLabel.text = "Error occurred";
+            S.update();
+        });
+
+        //AUDIO---------------------
+        const battle = new Aud({
         file:"battle.mp3",
         interrupt:"none",
         maxNum:1
-    }); 
+        }); 
 
-    const select= new Aud({
-            file:"select.mp3",
+        const select= new Aud({
+                file:"select.mp3",
+                interrupt:"none",
+                maxNum:1
+        });
+        const pickachu = new Aud({
+            file:"pickachu.mp3",
             interrupt:"none",
             maxNum:1
-    });
-    const pickachu = new Aud({
-        file:"pickachu.mp3",
-        interrupt:"none",
-        maxNum:1
-    });
+        });
 
-    const attack = new Aud({
-            file:"attack.mp3",
-            interrupt:"none",
-            maxNum:1
-    });
-    
+        const attack = new Aud({
+                file:"attack.mp3",
+                interrupt:"none",
+                maxNum:1
+        });
 
     function showOpeningContainer() { 
         const openingContainer = new Container(W, H).addTo(S).center();
@@ -79,6 +118,7 @@ function ready() {
                 })
         });
     };
+
   
 // INSTRUCTIONS ---------------------------------------------------------------------------------
     function showInstructionalGuide() {
@@ -186,32 +226,28 @@ function ready() {
 
         let moveAmount = 280;
         let newX = pickerContainer.x; 
-        F.on("keydown", e => {
-            if (e.key == "ArrowLeft") {
-                newX = Math.max(newX - moveAmount, 0 + 290);
-                pickerContainer.x = newX;
-                select.play();
-                checkHitTest(); 
-            } else if (e.key == "ArrowRight") {
-                newX = Math.min(newX + moveAmount + 10, S.width - 180);
-                pickerContainer.x = newX;
-                select.play();
-                checkHitTest(); 
-            }
 
-            let bounds = pickerContainer.getBounds();
-        });
-
-        aButton.on("click", () => {
+        socket.on("buttonPress", (key) => {
+        if (key === "ArrowLeft") {
+            let newXLeft = Math.max(pickerContainer.x - moveAmount, 0 + 290);
+            pickerContainer.x = newXLeft;
+            select.play();
+            checkHitTest();
+        } else if (key === "ArrowRight") {
+            let newXRight = Math.min(pickerContainer.x + moveAmount + 10, S.width - 180);
+            pickerContainer.x = newXRight;
+            select.play();
+            checkHitTest();
+        } else if (key === "A") {
             checkHitTest();
             choosePokemonPlayer2();
             choosePokemonContainer.removeFrom();
             zog("Selected Pokemon Player 1: " + selectedPokemonPlayer1);
             select.play();
-
-            // Remove the tap event listener for player 1 selection
-            aButton.off("click");
-        });
+        } else {
+            console.log("Unrecognized key pressed:", key);
+        }
+    });
 
         function checkHitTest() {
             pokemonContainers.forEach(pokemon => {
@@ -280,7 +316,7 @@ function ready() {
 
         let moveAmount = 280;
         let newX = pickerContainer.x; 
-        F.on("keydown", e => {
+        socket.on("buttonPress", (key) => {
             if (e.key == "ArrowLeft") {
                 newX = Math.max(newX - moveAmount, 0 + 290);
                 pickerContainer.x = newX;
@@ -291,10 +327,23 @@ function ready() {
                 pickerContainer.x = newX;
                 select.play();
                 checkHitTest(); // Check hitTest after movement
+            
+            } else if (key === "A") {
+                checkHitTest();
+                transitionSequence();
+                select.play();
+                choosePokemonContainer.removeFrom();
+                zog("Selected Pokemon Player 2: " + selectedPokemonPlayer2);
+                const transition = new Rectangle(W, H, black).center().addTo().alp(0).animate({
+                    props: { alpha: 1 },
+                    time: 3,
+                    rewind: false
+                });
+            } else {
+                zog("Unrecognized key pressed:", key);
             }
-
-            let bounds = pickerContainer.getBounds();
         });
+    
 
         let bButton = new Button({
             label: "B",
@@ -306,25 +355,6 @@ function ready() {
             borderColor: black,
             corner: 25
         }).addTo(choosePokemonContainer).pos(10, 10, RIGHT, BOTTOM);
-
-        
-        
-        bButton.on("click", ()=> {
-            checkHitTest();
-            transitionSequence();
-            select.play();
-            choosePokemonContainer.removeFrom();
-            const transition = new Rectangle(W, H, black).center().addTo().alp(0).animate({
-                props: { alpha: 1 },
-                time: 3,
-                rewind: false
-            });
-            
-            zog("Selected Pokemon Player 2: " + selectedPokemonPlayer2);
-
-            bButton.off("click");
-        });
-
 
         function checkHitTest() {
             pokemonContainers.forEach(pokemon => {
@@ -887,20 +917,22 @@ function ready() {
             }
 
 
-                F.on("keydown", (e) => {
-                    if (e.key === "Enter" && isAnimating) {
-                        stopP2Bar(p2bar);
-                        S.update();
-                    }
-                });
+            socket.on("tiltData", (e) => {
+                if (isAnimating) {
+                    const rotationY = e.rotationY;
+                    stopP1Bar(p1bar);
+                    S.update();
+                }
+            });
 
-                F.on("keydown", (e) => {
-                    if ((e.key === "a" || e.key === "A") && isAnimating) {
-                        stopP1Bar(p1bar);
-                        S.update();
-                    }
-                });
-
+            socket.on("motionData", (e) => {
+                if (isAnimating) {
+                    const accelerationX = e.accelerationX;
+                    const accelerationY = e.accelerationY;
+                    stopP2Bar(p2bar);
+                    S.update();
+                }
+            });
                 Ticker.add(() => {
                 if (!isAnimating) { 
                     setTimeout(() => {
@@ -918,8 +950,9 @@ function ready() {
             S.update();
         }
 
-          // End game functionality---------------------------------------
-          function endGame(winner) {
+
+        // End game functionality---------------------------------------
+        function endGame(winner) {
             const endGameContainer = new Container(W, H).addTo(S).center();
 
             const winnerLabel = new Label({
@@ -942,6 +975,7 @@ function ready() {
 
             restartButton.on("click", () => {
                 window.location.reload();
+                select.play();
                 S.removeAllChildren();
                 S.update();
             });
@@ -966,9 +1000,10 @@ function ready() {
 
     // choosePokemonPlayer1()
     // showInstructionalGuide()
-    showOpeningContainer()
+    // showOpeningContainer()
+    setupMainScreen()
     // battleScene(selectedPokemonPlayer1, selectedPokemonPlayer2)
-
+}
 } // end ready
 
 </script>
