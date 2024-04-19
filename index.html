@@ -11,16 +11,17 @@
 import zim from "https://zimjs.org/cdn/016/zim_socket2"; 
 import zim2 from "https://zimjs.org/cdn/016/zim_game";
 
-const assets = ["inGame.ttf","Hollow.ttf","Solid.ttf","bulbasaur.png","charmander.png","squirtle.png",
-"picker.png","pokeball.png", "battleBackground.png","battleTextBox.png","bulbasaur-mirrored.png","charmander-mirrored.png","squirtle-mirrored.png",
-"vineWhip.png","leaf.png","ember.png","flame.png","bubbles.png","attack.mp3","select.mp3","pickachu.mp3","battle.mp3"];
-
-const path = "assets/"
+const assets = ["assets/inGame.ttf","assets/Hollow.ttf","assets/Solid.ttf","assets/bulbasaur.png","assets/charmander.png","assets/squirtle.png",
+"assets/picker.png","assets/pokeball.png", "assets/battleBackground.png","assets/battleTextBox.png","assets/bulbasaur-mirrored.png","assets/charmander-mirrored.png","assets/squirtle-mirrored.png",
+"assets/vineWhip.png","assets/leaf.png","assets/ember.png","assets/flame.png","assets/bubbles.png","assets/attack.mp3","assets/select.mp3","assets/pickachu.mp3","assets/battle.mp3"];
 
 // See Docs under Frame for FIT, FILL, FULL, and TAG
-new Frame(FIT, 1024, 768, darker, dark, ready, assets, path);
+new Frame(FIT, 1024, 768, darker, dark, ready, assets);
 function ready() {
-
+         STYLE = {
+            font: "InGame.ttf",
+             color:white
+            };
     let socket;
 
     function setupMainScreen() {
